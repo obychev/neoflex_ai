@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite
+*.db
+
+# Environment
+.env
+venv/
+.env.*
+
+# IDEs
+.idea/
+.vscode/
+.spyderproject/
+.spyproject/
+
+# Data caches
+data/cache/
