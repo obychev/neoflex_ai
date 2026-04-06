@@ -19,38 +19,34 @@ class StockRequest(BaseModel):
 # -----------------------
 def get_moex_metrics(ticker: str):
     url = f"https://iss.moex.com/iss/engines/stock/markets/shares/securities/{ticker}.json"
-    response = requests.get(url)
     
+    try:
+        response = requests.get(url, timeout=10)
+    except requests.RequestException:
+        raise HTTPException(status_code=500, detail="Ошибка подключения к MOEX API")
+
     if response.status_code != 200:
-        raise HTTPException(status_code=404, detail=f"Ticker {ticker} not found on MOEX")
+        raise HTTPException(status_code=404, detail=f"Тикер {ticker} не найден на MOEX")
     
     data = response.json()
     market_data = data.get('marketdata', {}).get('data', [])
     columns = data.get('marketdata', {}).get('columns', [])
     
     if not market_data:
-        raise HTTPException(status_code=404, detail=f"No market data for {ticker}")
+        raise HTTPException(status_code=404, detail=f"Нет рыночных данных по тикеру {ticker}")
     
     df_row = dict(zip(columns, market_data[0]))
     
-    # Получаем нужные метрики
-    try:
-        pe = float(df_row.get('P/E', 0))
-    except:
-        pe = 0
-    try:
-        roe = float(df_row.get('ROE', 0))
-    except:
-        roe = 0
-    try:
-        div_yield = float(df_row.get('DIVIDEND', 0))
-    except:
-        div_yield = 0
+    def safe_float(value):
+        try:
+            return float(value)
+        except:
+            return 0.0
     
     return {
-        "pe": pe,
-        "roe": roe,
-        "div_yield": div_yield
+        "pe": safe_float(df_row.get('P/E')),
+        "roe": safe_float(df_row.get('ROE')),
+        "div_yield": safe_float(df_row.get('DIVIDEND'))
     }
 
 # -----------------------
