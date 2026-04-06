@@ -11,9 +11,6 @@
 ## Установка
 
 1. Клонировать репозиторий
-```bash
-git clone <repo_url>
-cd project
 
 2. Установить зависимости
 pip install -r requirements.txt
